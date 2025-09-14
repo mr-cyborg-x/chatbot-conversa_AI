@@ -1,10 +1,5 @@
-# Core
 streamlit
 langdetect
-faiss-cpu
-
-# Hugging Face models
-transformers>=4.30.2
-sentence-transformers
+transformers
+torch
 sentencepiece
-huggingface_hub
