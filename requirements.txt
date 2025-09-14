@@ -1,5 +1,6 @@
 streamlit
 langdetect
+transformers>=4.0.0
 sentence-transformers
 faiss-cpu
 torch
