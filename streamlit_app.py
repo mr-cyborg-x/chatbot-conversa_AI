@@ -4,8 +4,16 @@ from langdetect import detect
 from transformers import MarianMTModel, MarianTokenizer
 from sentence_transformers import SentenceTransformer
 import faiss
+import os
+from huggingface_hub import login
 
 st.title("🎓 College Multilingual Chatbot")
+
+# 🔑 Login to Hugging Face using Streamlit Secrets
+if "HUGGINGFACEHUB_API_TOKEN" in os.environ:
+    login(token=os.environ["HUGGINGFACEHUB_API_TOKEN"])
+else:
+    st.warning("⚠️ Hugging Face token not found! Please set it in Streamlit Secrets.")
 
 # Load FAQs
 with open("faq_data.json", "r", encoding="utf-8") as f:
@@ -38,8 +46,14 @@ LANG_MODELS = {
 
 marian_models = {}
 for lang, model_name in LANG_MODELS.items():
-    tokenizer = MarianTokenizer.from_pretrained(model_name)
-    model = MarianMTModel.from_pretrained(model_name)
+    tokenizer = MarianTokenizer.from_pretrained(
+        model_name,
+        use_auth_token=os.environ.get("HUGGINGFACEHUB_API_TOKEN")
+    )
+    model = MarianMTModel.from_pretrained(
+        model_name,
+        use_auth_token=os.environ.get("HUGGINGFACEHUB_API_TOKEN")
+    )
     marian_models[lang] = (tokenizer, model)
 
 def translate_to_en(text, lang):
@@ -53,8 +67,14 @@ def translate_to_en(text, lang):
 def translate_from_en(text, lang):
     rev_model_name = f"Helsinki-NLP/opus-mt-en-{lang}"
     try:
-        tokenizer = MarianTokenizer.from_pretrained(rev_model_name)
-        model = MarianMTModel.from_pretrained(rev_model_name)
+        tokenizer = MarianTokenizer.from_pretrained(
+            rev_model_name,
+            use_auth_token=os.environ.get("HUGGINGFACEHUB_API_TOKEN")
+        )
+        model = MarianMTModel.from_pretrained(
+            rev_model_name,
+            use_auth_token=os.environ.get("HUGGINGFACEHUB_API_TOKEN")
+        )
         inputs = tokenizer(text, return_tensors="pt", padding=True)
         translated = model.generate(**inputs)
         return tokenizer.decode(translated[0], skip_special_tokens=True)
